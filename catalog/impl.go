@@ -1,5 +1,4 @@
-MIT License
-
+/*
 Copyright (c) 2018 Simon Schmidt
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,3 +18,40 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+*/
+
+
+package catalog
+
+type ObjectImpl struct{
+	FName,FSchema,FInternalID string
+}
+func (o *ObjectImpl) Name() string { return o.FName }
+func (o *ObjectImpl) Schema() string { return o.FSchema }
+func (o *ObjectImpl) InternalID() string { return o.FInternalID }
+
+var _ Object = (*ObjectImpl)(nil)
+
+type ColumnImpl struct{
+	FName,FType string
+	FIndex interface{}
+}
+func (c *ColumnImpl) Name() string       { return c.FName  }
+func (c *ColumnImpl) Type() string       { return c.FType  }
+func (c *ColumnImpl) Index() interface{} { return c.FIndex }
+
+var _ Column = (*ColumnImpl)(nil)
+
+type RelationImpl struct{
+	ObjectImpl
+	FColumns []Column
+}
+func (c *RelationImpl) Columns() []Column { return c.FColumns }
+func (c *RelationImpl) Column(name string) Column {
+	for _,c := range c.FColumns {
+		if c.Name()==name { return c }
+	}
+	return nil
+}
+var _ Relation = (*RelationImpl)(nil)
+

@@ -1,5 +1,4 @@
-MIT License
-
+/*
 Copyright (c) 2018 Simon Schmidt
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,3 +18,33 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+*/
+
+
+package catalog
+
+const DefaultSchemaAlias = ""
+const DefaultSchemaName  = "default"
+
+type Catalog interface{
+	GetRelation(schema,name string) Relation
+}
+
+type Object interface{
+	Name() string
+	Schema() string
+	InternalID() string
+}
+
+type Column interface{
+	Name() string
+	Type() string
+	Index() interface{}
+}
+
+type Relation interface{
+	Object
+	Columns() []Column
+	Column(name string) Column
+}
+

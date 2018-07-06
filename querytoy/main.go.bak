@@ -1,0 +1,79 @@
+/*
+Copyright (c) 2018 Simon Schmidt
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
+package main
+
+import "github.com/xwb1989/sqlparser"
+import "fmt"
+import "github.com/araddon/qlbridge/expr"
+import "github.com/araddon/qlbridge/datasource"
+import "github.com/araddon/qlbridge/vm"
+import "reflect"
+import _ "github.com/a-mail-group/querytoy/catalog"
+
+func Type(i interface{}) interface{} {
+	if i==nil { return nil }
+	return reflect.ValueOf(i).Type()
+}
+
+func main(){
+	fmt.Println(sqlparser.Parse("SELECT * FROM MyUsers JOIN OtherUser WHERE a = 'abc'"))
+	fmt.Println(sqlparser.Parse("SELECT * FROM MyUsers,OtherUser WHERE a = 'abc'"))
+	fmt.Println(sqlparser.Parse("SELECT * FROM MyUsers JOIN OtherUser JOIN Xml,Tarte WHERE a = 'abc'"))
+	fmt.Println(sqlparser.Parse("CREATE TABLE hall (a int,b int, c int)"))
+	fmt.Println()
+	{
+		stm,_ := sqlparser.Parse("SELECT * FROM MySchema.MyUsers a")
+		//stm.(*sqlparser.Select).From[0].(*sqlparser.AliasedTableExpr)
+		fmt.Println(reflect.ValueOf(stm.(*sqlparser.Select).From[0]).Type())
+		fmt.Println(stm.(*sqlparser.Select).From[0])
+	}
+	fmt.Println()
+	{
+		stm,_ := sqlparser.Parse("SELECT *,test,a.test FROM MySchema.MyUsers a")
+		for _,ex := range stm.(*sqlparser.Select).SelectExprs {
+			a,ok := ex.(*sqlparser.AliasedExpr)
+			if ok {
+				fmt.Println(Type(a.Expr),a.Expr)
+			}
+		}
+	}
+	fmt.Println()
+	{
+		stm,_ := sqlparser.Parse("SELECT *,test,a.test FROM MySchema.MyUsers a WHERE a.uid BETWEEN ? AND ?")
+		wb := sqlparser.NewTrackedBuffer(nil)
+		wb.WriteNode(stm)
+		fmt.Println(wb.String())
+	}
+	fmt.Println()
+	ctx := datasource.NewContextSimpleNative(map[string]interface{}{
+		"a": "abc",
+		"vint5":5,
+		"vfloat5":5.0,
+		"tbl.vint5":8,
+		"___._1":"Hallo ' Welt",
+	})
+	fmt.Println(vm.Eval(ctx,expr.MustParse("vint5 = 'abd'")))
+	fmt.Println("v: ",reflect.ValueOf(expr.MustParse("___._1")).Type())
+}
+
