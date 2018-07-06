@@ -25,5 +25,28 @@ package rewriter
 
 import "github.com/xwb1989/sqlparser"
 
+func appendTableX(f *[]sqlparser.TableExprs, te sqlparser.TableExprs) {
+	switch vte := te.(type) {
+	case *sqlparser.JoinTableExpr:
+		vte.LeftExpr
+	}
+}
+func processSelect(s *sqlparser.Select) {
+	{
+		nfrom := make(sqlparser.TableExprs,0,len(s.From))
+		for _,te := range s.From {
+			switch vte := te.(type) {
+			case *sqlparser.JoinTableExpr:
+				vte.
+			}
+		}
+	}
+}
 
+func ProcessStatement(s sqlparser.Statement) {
+	switch v := s.(type) {
+	case *sqlparser.Select:
+		
+	}
+}
 
