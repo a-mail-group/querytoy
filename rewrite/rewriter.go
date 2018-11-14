@@ -109,7 +109,7 @@ func (q *queryContext) collect(c *Conn,expr sqlparser.TableExpr) error {
 			if sch==nil { return }
 			tab := sch.Tables[N]
 			if tab==nil { return }
-			if name!="" { Q,N = "",name }
+			if name!="" { Q,N = "",name } else if v.Qualifier.String()=="" { Q = "" }
 			q.src = append(q.src,aliasedSrc_mk(Q,N,altt,tab.Columns))
 		case *sqlparser.Subquery:
 			sel := findDefinition(v.Select)
