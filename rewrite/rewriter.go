@@ -137,7 +137,10 @@ func (q *queryContext) collect(c *Conn,expr sqlparser.TableExpr) error {
 		return
 	}
 	return sqlparser.Walk(func(node sqlparser.SQLNode) (kontinue bool, err error) {
-		if _,ok := node.(sqlparser.TableExpr); !ok { return }
+		switch node.(type){
+		case sqlparser.TableExpr,sqlparser.TableExprs:
+		default: return
+		}
 		
 		switch v := node.(type) {
 		case *sqlparser.AliasedTableExpr:
